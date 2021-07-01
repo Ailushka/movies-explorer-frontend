@@ -1,0 +1,75 @@
+.movies__card {
+  background: #FDFDFD;
+  box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+}
+
+.movies__card:hover {
+  cursor: pointer;
+}
+
+.movie__thumbnail {
+  display: block;
+  width: 100%;
+  border-radius: 10px 10px 0px 0px;
+}
+
+.movie__info {
+  display: grid;
+  grid-template-columns: auto 30px;
+  gap: 17px 20px;
+  align-items: center;
+  padding: 10px 16px 16px;
+}
+
+.movie__title {
+  margin: 0;
+  padding: 6px 0 0;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: calc(16 / 13);
+}
+
+.movie__duration {
+  margin: 0;
+  padding: 0;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: calc(13 / 11);
+  color: #A0A0A0;
+}
+
+.button_type_save {
+  width: 14px;
+  height: 12px;
+  margin: auto;
+  border: none;
+  background: transparent;
+  background-image: url("../../images/like.svg");
+  background-repeat: no-repeat;
+  background-position: bottom;
+  transition: background-color .5s ease-out;
+}
+
+.button_type_clicked {
+  background-image: url("../../images/like_clicked.svg");
+}
+
+.button_type_delete {
+  background-image: none;
+}
+
+.movies__card:hover .button_type_delete {
+  background-image: url("../../images/delete.svg");
+  cursor: pointer;
+}
+
+.button_type_save:hover {
+  transform: scale(1.5);
+}
+
+@media (max-width: 425px) {
+  .movie__info {
+    padding: 8px 10px 14px 14px;
+  }
+}
