@@ -1,0 +1,28 @@
+.user-nav__link_type_account {
+  padding: 8px 12px 8px 31px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 50px;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: calc(16 / 14);
+  position: relative;
+  transition: opacity .5s linear;
+  color: #000000;
+  text-decoration: none;
+}
+
+.user-nav__link_type_account:hover {
+  opacity: .8;
+}
+
+.user-nav__link_type_account::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 14px;
+  background-image: url("../../images/account.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  top: 8px;
+  left: 12px;
+}

@@ -1,0 +1,71 @@
+.header_theme_dark {
+  background-color: #073042;
+}
+
+.header__logo {
+  display: block;
+  width: 38px;
+  height: 38px;
+}
+
+.header__content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0;
+  position: relative;
+}
+
+.user-nav {
+  display: flex;
+}
+
+.user-nav__item {
+  margin-right: 10px;
+}
+
+.user-nav__item:last-child {
+  margin-right: 0;
+}
+
+.user-nav__link_type_signup {
+  color: white;
+}
+
+.user-nav__link_type_signin {
+  color: black;
+  background-color: #2BE080;
+  border-radius: 3px;
+}
+
+.user-nav__link {
+  padding: 8px 20px;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: calc(16 / 12);
+  text-decoration: none;
+  transition: opacity .5s linear;
+}
+
+.user-nav__link:hover {
+  opacity: .8;
+}
+
+@media (max-width: 768px) {
+  .user-nav__item_type_account {
+    display: none;
+  }
+}
+
+@media (max-width: 425px) {
+  .user-nav__link {
+    padding: 5px 12px;
+    font-size: 10px;
+    line-height: calc(16 / 10);
+    text-decoration: none;
+  }
+  .user-nav__item {
+    margin-right: 2px;
+  }
+}

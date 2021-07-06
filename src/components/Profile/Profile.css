@@ -1,0 +1,133 @@
+.profile {
+  max-width: 410px;
+  margin: auto;
+}
+
+.profile__title {
+  font-weight: 500;
+  font-size: 24px;
+  line-height: calc(29 / 24);
+  text-align: center;
+  margin: 74px 0 123px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form__container_type_profile {
+  border: none;
+  margin: 0 0 220px;
+  padding: 0;
+}
+
+.list {
+  list-style-type: none;
+}
+
+.form__content {
+  margin: 0;
+  padding: 0;
+}
+
+.form__item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid #E8E8E8;
+  margin-bottom: 17px;
+}
+
+.form__item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.form__label {
+  font-weight: 500;
+  font-size: 11px;
+  line-height: calc(13 / 11);
+  margin-bottom: 16px;
+}
+
+.form__input {
+  font-weight: 400;
+  font-size: 11px;
+  line-height: calc(13 / 11);
+  border: none;
+  outline: none;
+  text-align: right;
+  background: transparent;
+}
+
+.form__input:last-child {
+  margin-bottom: 10px;
+}
+
+.form__input-error {
+  font-weight: 400;
+  font-size: 10px;
+  line-height: calc(12 / 10);
+  color: #FF3055;
+}
+
+.button_type_edit {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: calc(16 / 13);
+  margin-bottom: 16px;
+  background: transparent;
+  border: none;
+  outline: none;
+  transition: opacity .5s linear;
+}
+
+.button_type_edit:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.button_inactive {
+  opacity: 0.6;
+  transition: opacity .5s linear;
+}
+
+.button_inactive:hover {
+  opacity: 1;
+}
+
+.profile__link {
+  font-weight: 500;
+  font-size: 13px;
+  line-height: calc(16 / 13);
+  color: #FF3055;
+  text-decoration: none;
+  margin-bottom: 70px;
+  text-align: center;
+  transition: opacity .5s linear;
+}
+
+.profile__link:hover {
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+@media (max-width: 485px) {
+  .profile {
+    max-width: 260px;
+  }
+
+.profile__title {
+    margin: 70px 0 80px;
+  }
+  .form__container_type_profile {
+    margin-bottom: 379px;
+  }
+  .profile__link {
+    font-size: 12px;
+    line-height: calc(15 / 12);
+    margin-bottom: 40px;
+  }
+}
