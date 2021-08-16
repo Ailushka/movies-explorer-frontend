@@ -84,18 +84,13 @@
   transition: opacity .5s linear;
 }
 
-.button_type_edit:hover {
+.button_type_edit:enabled:hover {
   opacity: 0.8;
   cursor: pointer;
 }
 
 .button_inactive {
   opacity: 0.6;
-  transition: opacity .5s linear;
-}
-
-.button_inactive:hover {
-  opacity: 1;
 }
 
 .profile__link {

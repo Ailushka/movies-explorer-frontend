@@ -1,17 +1,26 @@
 import './FilterCheckBox.css';
 
-function FilterCheckBox() {
+
+function FilterCheckBox({onChangeFilters}) {
+  function handleChangeFilter(evt) {
+    onChangeFilters({
+      key: evt.target.name,
+      value: evt.target.type === "checkbox" ? evt.target.checked : evt.target.value,
+    });
+  }
+
   return (
-    <div class="filtercheckbox">
-      <label for="filtercheckbox" class="filtercheckbox__label">
-        <span class="filtercheckbox__text">Короткометражки</span>
+    <div className="filtercheckbox">
+      <label htmlFor="filtercheckbox" className="filtercheckbox__label">
+        <span className="filtercheckbox__text">Короткометражки</span>
         <input
-          class="filtercheckbox__input"
+          className="filtercheckbox__input"
           type="checkbox"
           name="filtercheckbox"
           id="filtercheckbox"
+          onChange={handleChangeFilter}
         />
-        <span class="filtercheckbox__switch"></span>
+        <span className="filtercheckbox__switch"></span>
       </label>
     </div>
   );

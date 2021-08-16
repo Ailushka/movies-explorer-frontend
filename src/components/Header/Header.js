@@ -1,14 +1,13 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Header.css';
 import Account from '../Account/Account.js';
 import Navigation from '../Navigation/Navigation.js';
 import logo from '../../images/logo.svg';
 
-function Header() {
-  const location = useLocation();
+function Header({ loggedIn }) {
   let headerClass;
 
-  if (location.pathname === "/") { headerClass = "header_theme_dark"}
+  if (!loggedIn) { headerClass = "header_theme_dark"}
 
   return (
     <header className={`header ${headerClass}`}>
@@ -17,7 +16,7 @@ function Header() {
         <img className="header__logo" src={logo} alt="Логотип дипломного проекта" />
       </Link>
       {
-        location.pathname === "/"
+        !loggedIn
           ? ( ""
             )
           : (
@@ -26,7 +25,7 @@ function Header() {
       }
         <ul className="user-nav list">
         {
-          location.pathname === "/"
+          !loggedIn
             ? (
               <>
                 <li className="user-nav__item">

@@ -1,4 +1,5 @@
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect, useHistory } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import Header from '../Header/Header.js';
 import Main from '../Main/Main.js';
 import Footer from '../Footer/Footer.js';
@@ -7,46 +8,372 @@ import Login from '../Login/Login.js';
 import Profile from '../Profile/Profile.js';
 import SearchForm from '../SearchForm/SearchForm.js';
 import MoviesCardList from '../MoviesCardList/MoviesCardList.js';
-import MoreButton from '../MoreButton/MoreButton.js';
 import PageNotFound from '../PageNotFound/PageNotFound.js';
+import InfoTooltip from '../InfoTooltip/InfoTooltip.js';
+import ProtectedRoute from '../ProtectedRoute/ProtectedRoute.js';
+import moviesApi from '../../utils/MoviesApi.js';
+import mainApi from '../../utils/MainApi.js';
+import auth from '../../utils/auth.js';
+import { CurrentUserContext } from '../../contexts/CurrentUserContext.js';
+import { SHORT_MOVIE_DURATION } from '../../utils/constants.js';
+import success from '../../images/success.svg';
+import fail from '../../images/fail.svg';
 
 function App() {
+  const [movies, setMovies] = useState([]);
+  const [userMovies, setUserMovies] = useState([]);
+  const [filters, setFilters] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState({});
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+  const [message, setMessage] = useState({image: "", text: ""});
+  const [errorMessage, setErrorMessage] = useState("");
+  const history = useHistory();
+
+
+// Аутентификация (регистрация, вход, проверка токена, выход)
+
+  useEffect(() => {
+    tokenCheck();
+  }, []);
+
+  function tokenCheck() {
+    if(localStorage.getItem('jwt')) {
+      const token = localStorage.getItem('jwt');
+      if(token) {
+        auth.getContent(token)
+          .then((res) => {
+            if(res) {
+              setCurrentUser(res);
+            };
+            setLoggedIn(true);
+            history.push('/movies');
+          })
+          .catch(err => {
+            localStorage.removeItem('jwt');
+            console.log(err);
+            history.push('/');}
+          )}
+    }
+  }
+
+  function onRegister(user) {
+    const { name, email, password } = user;
+    setIsLoading(true);
+    auth.signup(name, email, password)
+      .then((user) => {
+        if(user) {
+          setLoggedIn(true);
+          setCurrentUser(user);
+          localStorage.setItem('jwt', user.token);
+          history.push('/movies');
+        }
+        setIsInfoTooltipOpen(true);
+        handleInfoTooltipContent({
+          image: success,
+          text: "Вы успешно зарегистрировались!"
+        });
+        if(user) {
+          history.push('/movies');
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsInfoTooltipOpen(true);
+        handleInfoTooltipContent({
+          image: fail,
+          text: "Что-то пошло не так! Попробуйте ещё раз."
+        });
+        if (err.status && err.status === 400) {
+          handleError('При регистрации произошла ошибка. Токен не передан или передан не в том формате.');
+        } else if (err.status && err.status === 409) {
+          handleError('Пользователь с таким email уже существует.');
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+        closeAllPopups();
+      });
+  }
+
+  function onLogin(user) {
+    const { email, password } = user;
+    setIsLoading(true);
+    auth.signin(email, password)
+      .then((user) => {
+        if(user) {
+          setLoggedIn(true);
+          setCurrentUser(user);
+          localStorage.setItem('jwt', user.token);
+          history.push('/movies');
+        }
+      })
+      .catch((err) => {
+        if (err.status && err.status === 400) {
+          handleError('При авторизации произошла ошибка. Токен не передан или передан не в том формате.');
+        } else if (err.status && err.status === 401) {
+          handleError('Вы ввели неправильный логин или пароль.');
+        } else if (err.status && err.status === 403) {
+          handleError('При авторизации произошла ошибка. Переданный токен некорректен.');
+        }
+      })
+      .finally(() => setIsLoading(false));
+  }
+
+  function onLogOut() {
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('movies');
+    localStorage.removeItem('userMovies');
+    localStorage.clear();
+    setLoggedIn(false);
+    setCurrentUser(null);
+    setMovies([]);
+    setUserMovies([]);
+    history.push('/');
+  }
+
+  // Данные пользователя и фильмы
+  useEffect(() => {
+    setIsLoading(true);
+    mainApi.getCurrentUser()
+      .then((res) => {
+        setLoggedIn(true);
+        setCurrentUser(res);
+        localStorage.setItem('currentUser', JSON.stringify(res));
+      })
+      .catch(err => console.log(err))
+      .finally(() => {
+        setIsLoading(false);
+      });
+
+    if (localStorage.getItem('movies')) {
+      setMovies(JSON.parse(localStorage.getItem('movies')));
+    }
+  }, []);
+
+  function getMovies() {
+    setIsLoading(true);
+    moviesApi.getMovies()
+      .then((movies) => {
+        const initialMovies = movies.map((movie) => {
+          return {
+            ...movie,
+            image: movie.image ? `https://api.nomoreparties.co${movie.image.url}` : "",
+            trailer: movie.trailerLink,
+          };
+        });
+        localStorage.setItem('movies', JSON.stringify(initialMovies));
+        handleFilterMovies();
+  })
+      .catch(err => console.log(err))
+      .finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    if (loggedIn) {
+      setIsLoading(true);
+      mainApi.getUserMovies()
+        .then((movies) => {
+          const savedMovies = movies.map((movie) => {
+            return {
+              ...movie,
+              id: movie.movieId,
+            };
+          });
+          localStorage.setItem('userMovies', JSON.stringify(savedMovies));
+          setUserMovies(savedMovies);
+    })
+        .catch(err => console.log(err))
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+
+  }, []);
+
+  function handleUpdateUser(user) {
+    setIsLoading(true);
+    mainApi.patchUserInfo(user)
+      .then((res) => {
+        setCurrentUser(res);
+        setIsInfoTooltipOpen(true);
+        handleInfoTooltipContent({
+          image: success,
+          text: "Информация успешно обновлена!"
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsInfoTooltipOpen(true);
+        handleInfoTooltipContent({
+          image: fail,
+          text: "Что-то пошло не так! Попробуйте ещё раз."
+        });
+        if (err.status && err.status === 400) {
+          handleError('При обновлении профиля произошла ошибка. Токен не передан или передан не в том формате.');
+        } else if (err.status && err.status === 409) {
+          handleError('Пользователь с таким email уже существует.');
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+        closeAllPopups();
+      });
+  }
+
+  function handleError(message) {
+    setErrorMessage(message);
+  }
+
+  function handleChangeFilters({key, value}) {
+    setFilters(prev => {
+      handleFilterMovies({ ...prev, [key]: value });
+      return { ...prev, [key]: value };
+    });
+  }
+
+  function handleFilterMovies(filters) {
+    if (localStorage.getItem('movies')) {
+      setIsLoading(true);
+      const filteredMovies = getFilteredMovies(JSON.parse(localStorage.getItem('movies')), filters || []);
+      setMovies(filteredMovies);
+      setIsLoading(false);
+    } else {
+      getMovies();
+    }
+  }
+
+  function getFilteredMovies(movies, { search = '', filtercheckbox = false}) {
+    return movies.filter(movie => {
+      if (filtercheckbox && movie.duration > SHORT_MOVIE_DURATION) {
+        return false;
+      }
+      for (let key in movie) {
+        if (movie.hasOwnProperty(key) && typeof movie[key] === 'string' && movie[key].toLowerCase().includes(search.toLowerCase())) {
+          return true;
+        }
+      }
+      return false;
+    });
+  }
+
+  function handleInfoTooltipContent({image, text}) {
+    setMessage({ image: image, text: text });
+  }
+
+  function closeAllPopups() {
+    setIsInfoTooltipOpen(false);
+  }
+
+  function handleSaveMovie(movie) {
+    setIsLoading(true);
+    mainApi.saveMovie(movie)
+      .then((res) => {
+        setUserMovies([...userMovies, {...res, id: res.movieId }]);
+        localStorage.setItem("userMovies", JSON.stringify(res));
+      })
+      .catch(err => console.log(err))
+      .finally(() => setIsLoading(false));
+  }
+
+  function handleDeleteMovie(movie) {
+    console.log(userMovies);
+    const id = userMovies.find(i => i.id === movie.id)._id;
+    setIsLoading(true);
+    mainApi.deleteMovie(id)
+      .then(() => setUserMovies(prev => prev.filter(i => i._id !== id)))
+      .catch(err => console.log(err))
+      .finally(() => setIsLoading(false));
+  }
+
   return (
-    <>
-      <Switch>
-        <Route exact path='/'>
-          <Header />
-          <Main />
-          <Footer />
-        </Route>
-        <Route path='/signup'>
-          <Register />
-        </Route>
-        <Route path='/signin'>
-          <Login />
-        </Route>
-        <Route path='/profile'>
-          <Header />
-          <Profile />
-        </Route>
-        <Route path='/movies'>
-          <Header />
-          <SearchForm />
-          <MoviesCardList />
-          <MoreButton />
-          <Footer />
-        </Route>
-        <Route path='/saved-movies'>
-          <Header />
-          <SearchForm />
-          <MoviesCardList />
-          <Footer />
-        </Route>
-        <Route path='*'>
-          <PageNotFound />
-        </Route>
-      </Switch>
-    </>
+
+      <CurrentUserContext.Provider value={currentUser}>
+        <Switch>
+          <Route exact path='/'>
+            <Header
+              loggedIn={loggedIn}
+            />
+            <Main />
+            <Footer />
+          </Route>
+          <Route exact path='/'>
+              {loggedIn ? <Redirect to='/' /> : <Redirect to='/signin' />}
+            </Route>
+          <Route path='/signup'>
+            <Register
+              onRegister={onRegister}
+              isLoading={isLoading}
+              errorMessage={errorMessage}
+            />
+          </Route>
+          <Route path='/signin'>
+            <Login
+              onLogin={onLogin}
+              isLoading={isLoading}
+              errorMessage={errorMessage}
+            />
+          </Route>
+          <ProtectedRoute path='/profile' loggedIn={loggedIn}>
+            <Header
+              loggedIn={loggedIn}
+            />
+            <Profile
+              onUpdateUser={handleUpdateUser}
+              isLoading={isLoading}
+              errorMessage={errorMessage}
+              onLogOut={onLogOut}
+            />
+          </ProtectedRoute>
+          <ProtectedRoute
+            path='/movies'
+            loggedIn={loggedIn}>
+            <Header
+              loggedIn={loggedIn}
+            />
+            <SearchForm
+              onChangeFilters={handleChangeFilters}
+            />
+            <MoviesCardList
+              movies={movies}
+              userMovies={userMovies}
+              isLoading={isLoading}
+              onSaveMovie={handleSaveMovie}
+              onDeleteMovie={handleDeleteMovie}
+            />
+            <Footer />
+          </ProtectedRoute>
+          <ProtectedRoute path='/saved-movies' loggedIn={loggedIn}>
+            <Header
+              loggedIn={loggedIn}
+            />
+            <SearchForm />
+            <MoviesCardList
+              movies={getFilteredMovies(userMovies, filters)}
+              userMovies={userMovies}
+              isLoading={isLoading}
+              onDeleteMovie={handleDeleteMovie}
+             />
+            <Footer />
+          </ProtectedRoute>
+          <Route path='*'>
+            <PageNotFound />
+          </Route>
+          <Route>
+            {loggedIn
+              ? (<Redirect to='/movies'/>)
+              : (<Redirect to='/signup'/>)
+            }
+          </Route>
+        </Switch>
+        <InfoTooltip
+          isOpen={isInfoTooltipOpen}
+          onClose={closeAllPopups}
+          message={message}
+        />
+      </CurrentUserContext.Provider>
+
   );
 }
 
