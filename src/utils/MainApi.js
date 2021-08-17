@@ -1,16 +1,15 @@
 import { MAIN_API_URL } from './constants';
 
 class Api {
-  constructor(url, token) {
+  constructor(url) {
     this._url = url;
-    this._token = token;
   }
 
   getCurrentUser() {
     return fetch(`${this._url}/users/me`, {
       method: 'GET',
       headers: {
-        'Authorization': this._token,
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
         'Content-Type': 'application/json'
       }
     })
@@ -21,7 +20,7 @@ class Api {
     return fetch(`${this._url}/movies`, {
       method: 'GET',
       headers: {
-        'Authorization': this._token,
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
         'Content-Type': 'application/json'
       }
     })
@@ -33,7 +32,7 @@ class Api {
     return fetch(`${this._url}/users/me`, {
       method: 'PATCH',
       headers: {
-        'Authorization': this._token,
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -50,7 +49,7 @@ class Api {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': this._token,
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
       },
       credentials: 'include',
       body: JSON.stringify({
@@ -75,7 +74,7 @@ class Api {
     return fetch(`${this._url}/movies/${id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': this._token,
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
         'Content-Type': 'application/json'
       }
     })
@@ -90,6 +89,6 @@ class Api {
   }
 }
 
-const mainApi = new Api(MAIN_API_URL, `Bearer ${localStorage.getItem('jwt')}`);
+const mainApi = new Api(MAIN_API_URL);
 
 export default mainApi;

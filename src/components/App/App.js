@@ -1,4 +1,4 @@
-import { Switch, Route, Redirect, useHistory } from 'react-router-dom';
+import { Switch, Route, Redirect, useHistory, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from '../Header/Header.js';
 import Main from '../Main/Main.js';
@@ -30,6 +30,7 @@ function App() {
   const [message, setMessage] = useState({image: "", text: ""});
   const [errorMessage, setErrorMessage] = useState("");
   const history = useHistory();
+  const location = useLocation();
 
 
 // Аутентификация (регистрация, вход, проверка токена, выход)
@@ -39,7 +40,6 @@ function App() {
   }, []);
 
   function tokenCheck() {
-    if(localStorage.getItem('jwt')) {
       const token = localStorage.getItem('jwt');
       if(token) {
         auth.getContent(token)
@@ -48,14 +48,14 @@ function App() {
               setCurrentUser(res);
             };
             setLoggedIn(true);
-            history.push('/movies');
+            history.push(location);
           })
           .catch(err => {
             localStorage.removeItem('jwt');
             console.log(err);
             history.push('/');}
           )}
-    }
+
   }
 
   function onRegister(user) {
@@ -298,9 +298,7 @@ function App() {
             <Main />
             <Footer />
           </Route>
-          <Route exact path='/'>
-              {loggedIn ? <Redirect to='/' /> : <Redirect to='/signin' />}
-            </Route>
+
           <Route path='/signup'>
             <Register
               onRegister={onRegister}
@@ -360,12 +358,7 @@ function App() {
           <Route path='*'>
             <PageNotFound />
           </Route>
-          <Route>
-            {loggedIn
-              ? (<Redirect to='/movies'/>)
-              : (<Redirect to='/signup'/>)
-            }
-          </Route>
+
         </Switch>
         <InfoTooltip
           isOpen={isInfoTooltipOpen}
