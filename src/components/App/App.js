@@ -182,15 +182,6 @@ function App() {
       .finally(() => setIsLoading(false));
   };
 
-  console.log(movies);
-  console.log(userMovies);
-
-  console.log((getFilteredMovies(movies, filters)));
-  console.log((getFilteredMovies(userMovies, filters)));
-  console.log(JSON.parse(localStorage.getItem('initialMovies')));
-  console.log(currentUser);
-  console.log(localStorage.getItem('jwt'));
-
   function handleUpdateUser(user) {
     setDisabledInputs(true);
     setIsLoading(true);
