@@ -30,6 +30,9 @@
   line-height: calc(17 / 14);
   color: #3456F3;
   margin: auto 0 60px;
+  background: transparent;
+  border: none;
+  outline: none;
   transition: opacity .5s linear;
 }
 
