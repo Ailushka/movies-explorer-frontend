@@ -59,7 +59,8 @@ function App() {
   }
 
   useEffect(() => {
-    if (loggedIn) {
+    const token = localStorage.getItem('jwt');
+    if (token && loggedIn) {
       getUserMovies();
     }
   }, [loggedIn]);
@@ -73,7 +74,6 @@ function App() {
             id: movie.movieId
           };
         });
-        setUserMovies(savedMovies);
         setUserMovies(savedMovies.filter(i => i.owner === currentUser._id));
       })
       .catch(err => console.log(err));

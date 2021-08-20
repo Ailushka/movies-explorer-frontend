@@ -45,7 +45,7 @@ function MoviesCardList({movies, userMovies, addMoreMovies, isLoading, onSaveMov
           {movies.map((movie) => {
             return (
               <MoviesCard
-                key={movie._id}
+                key={movie.id}
                 movie={movie}
                 isLiked={userMovies.some(savedMovie => savedMovie.id === movie.id)}
                 onSaveMovie={onSaveMovie}
