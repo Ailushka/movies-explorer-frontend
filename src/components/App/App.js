@@ -29,11 +29,9 @@ function App() {
   const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const [message, setMessage] = useState({image: "", text: ""});
   const [errorMessage, setErrorMessage] = useState("");
+  const [disabledInputs, setDisabledInputs] = useState(false);
   const history = useHistory();
   const location = useLocation();
-
-
-// Аутентификация (регистрация, вход, проверка токена, выход)
 
   useEffect(() => {
     tokenCheck();
@@ -55,70 +53,91 @@ function App() {
             console.log(err);
             history.push('/');}
           )}
+      if (localStorage.getItem('filteredMovies')) {
+        setMovies(JSON.parse(localStorage.getItem('filteredMovies')));
+      }
+  }
 
+  useEffect(() => {
+    if (loggedIn) {
+      getUserMovies();
+    }
+  }, [loggedIn]);
+
+  function getUserMovies() {
+    mainApi.getUserMovies()
+      .then((movies) => {
+        const savedMovies = movies.map((movie) => {
+          return {
+            ...movie,
+            id: movie.movieId
+          };
+        });
+        setUserMovies(savedMovies);
+        setUserMovies(savedMovies.filter(i => i.owner === currentUser._id));
+      })
+      .catch(err => console.log(err));
   }
 
   function onRegister(user) {
     const { name, email, password } = user;
+    setDisabledInputs(true);
     setIsLoading(true);
     auth.signup(name, email, password)
       .then((user) => {
         if(user) {
-          setLoggedIn(true);
-          setCurrentUser(user);
-          localStorage.setItem('jwt', user.token);
-          history.push('/movies');
-        }
-        setIsInfoTooltipOpen(true);
-        handleInfoTooltipContent({
-          image: success,
-          text: "Вы успешно зарегистрировались!"
-        });
-        if(user) {
-          history.push('/movies');
+          onLogin({email, password});
+          setIsInfoTooltipOpen(true);
+          handleInfoTooltipContent({
+            image: success,
+            text: "Вы успешно зарегистрировались!"
+          });
         }
       })
       .catch((err) => {
-        console.log(err);
         setIsInfoTooltipOpen(true);
         handleInfoTooltipContent({
           image: fail,
           text: "Что-то пошло не так! Попробуйте ещё раз."
         });
-        if (err.status && err.status === 400) {
+        if (err && err === 400) {
           handleError('При регистрации произошла ошибка. Токен не передан или передан не в том формате.');
-        } else if (err.status && err.status === 409) {
+        } else if (err && err === 409) {
           handleError('Пользователь с таким email уже существует.');
         }
       })
       .finally(() => {
+        setDisabledInputs(false);
         setIsLoading(false);
-        closeAllPopups();
       });
   }
 
   function onLogin(user) {
     const { email, password } = user;
+    setDisabledInputs(true);
     setIsLoading(true);
     auth.signin(email, password)
       .then((user) => {
         if(user) {
           setLoggedIn(true);
-          setCurrentUser(user);
           localStorage.setItem('jwt', user.token);
+          getCurrentUser();
           history.push('/movies');
         }
       })
       .catch((err) => {
-        if (err.status && err.status === 400) {
+        if (err && err === 400) {
           handleError('При авторизации произошла ошибка. Токен не передан или передан не в том формате.');
-        } else if (err.status && err.status === 401) {
+        } else if (err && err === 401) {
           handleError('Вы ввели неправильный логин или пароль.');
-        } else if (err.status && err.status === 403) {
+        } else if (err && err === 403) {
           handleError('При авторизации произошла ошибка. Переданный токен некорректен.');
         }
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        setDisabledInputs(false);
+        setIsLoading(false);
+      });
   }
 
   function onLogOut() {
@@ -134,23 +153,16 @@ function App() {
   }
 
   // Данные пользователя и фильмы
-  useEffect(() => {
-    setIsLoading(true);
+  function getCurrentUser() {
     mainApi.getCurrentUser()
       .then((res) => {
-        setLoggedIn(true);
-        setCurrentUser(res);
-        localStorage.setItem('currentUser', JSON.stringify(res));
+        if (res) {
+          setCurrentUser(res);
+          localStorage.setItem('currentUser', JSON.stringify(res));
+        }
       })
-      .catch(err => console.log(err))
-      .finally(() => {
-        setIsLoading(false);
-      });
-
-    if (localStorage.getItem('movies')) {
-      setMovies(JSON.parse(localStorage.getItem('movies')));
-    }
-  }, []);
+      .catch(err => console.log(err));
+  }
 
   function getMovies() {
     setIsLoading(true);
@@ -163,36 +175,24 @@ function App() {
             trailer: movie.trailerLink,
           };
         });
-        localStorage.setItem('movies', JSON.stringify(initialMovies));
-        handleFilterMovies();
+        localStorage.setItem('initialMovies', JSON.stringify(initialMovies));
+        handleFilterMovies(filters);
   })
       .catch(err => console.log(err))
       .finally(() => setIsLoading(false));
   };
 
-  useEffect(() => {
-    if (loggedIn) {
-      setIsLoading(true);
-      mainApi.getUserMovies()
-        .then((movies) => {
-          const savedMovies = movies.map((movie) => {
-            return {
-              ...movie,
-              id: movie.movieId,
-            };
-          });
-          localStorage.setItem('userMovies', JSON.stringify(savedMovies));
-          setUserMovies(savedMovies);
-    })
-        .catch(err => console.log(err))
-        .finally(() => {
-          setIsLoading(false);
-        });
-    }
+  console.log(movies);
+  console.log(userMovies);
 
-  }, []);
+  console.log((getFilteredMovies(movies, filters)));
+  console.log((getFilteredMovies(userMovies, filters)));
+  console.log(JSON.parse(localStorage.getItem('initialMovies')));
+  console.log(currentUser);
+  console.log(localStorage.getItem('jwt'));
 
   function handleUpdateUser(user) {
+    setDisabledInputs(true);
     setIsLoading(true);
     mainApi.patchUserInfo(user)
       .then((res) => {
@@ -204,27 +204,29 @@ function App() {
         });
       })
       .catch((err) => {
-        console.log(err);
         setIsInfoTooltipOpen(true);
         handleInfoTooltipContent({
           image: fail,
           text: "Что-то пошло не так! Попробуйте ещё раз."
         });
-        if (err.status && err.status === 400) {
+        if (err && err === 400) {
           handleError('При обновлении профиля произошла ошибка. Токен не передан или передан не в том формате.');
-        } else if (err.status && err.status === 409) {
+        } else if (err && err === 409) {
           handleError('Пользователь с таким email уже существует.');
+        } else {
+          handleError(`Ошибка: ${err}.`);
         }
       })
       .finally(() => {
+        setDisabledInputs(false);
         setIsLoading(false);
-        closeAllPopups();
       });
   }
 
-  function handleError(message) {
+  const handleError = (message) => {
     setErrorMessage(message);
-  }
+    setTimeout(() => setErrorMessage(''), 3000);
+  };
 
   function handleChangeFilters({key, value}) {
     setFilters(prev => {
@@ -234,9 +236,10 @@ function App() {
   }
 
   function handleFilterMovies(filters) {
-    if (localStorage.getItem('movies')) {
+    if (localStorage.getItem('initialMovies')) {
       setIsLoading(true);
-      const filteredMovies = getFilteredMovies(JSON.parse(localStorage.getItem('movies')), filters || []);
+      const filteredMovies = getFilteredMovies(JSON.parse(localStorage.getItem('initialMovies')), filters) || [];
+      localStorage.setItem('filteredMovies', JSON.stringify(filteredMovies));
       setMovies(filteredMovies);
       setIsLoading(false);
     } else {
@@ -271,14 +274,12 @@ function App() {
     mainApi.saveMovie(movie)
       .then((res) => {
         setUserMovies([...userMovies, {...res, id: res.movieId }]);
-        localStorage.setItem("userMovies", JSON.stringify(res));
       })
       .catch(err => console.log(err))
       .finally(() => setIsLoading(false));
   }
 
   function handleDeleteMovie(movie) {
-    console.log(userMovies);
     const id = userMovies.find(i => i.id === movie.id)._id;
     setIsLoading(true);
     mainApi.deleteMovie(id)
@@ -300,18 +301,22 @@ function App() {
           </Route>
 
           <Route path='/signup'>
-            <Register
+            {loggedIn ? <Redirect to='/' /> :
+              <Register
               onRegister={onRegister}
               isLoading={isLoading}
               errorMessage={errorMessage}
-            />
+              isDisabled={disabledInputs}
+            />}
           </Route>
           <Route path='/signin'>
-            <Login
+            {loggedIn ? <Redirect to='/' /> :
+              <Login
               onLogin={onLogin}
               isLoading={isLoading}
               errorMessage={errorMessage}
-            />
+              isDisabled={disabledInputs}
+            />}
           </Route>
           <ProtectedRoute path='/profile' loggedIn={loggedIn}>
             <Header
@@ -322,6 +327,7 @@ function App() {
               isLoading={isLoading}
               errorMessage={errorMessage}
               onLogOut={onLogOut}
+              isDisabled={disabledInputs}
             />
           </ProtectedRoute>
           <ProtectedRoute
@@ -346,7 +352,9 @@ function App() {
             <Header
               loggedIn={loggedIn}
             />
-            <SearchForm />
+            <SearchForm
+              onChangeFilters={handleChangeFilters}
+            />
             <MoviesCardList
               movies={getFilteredMovies(userMovies, filters)}
               userMovies={userMovies}

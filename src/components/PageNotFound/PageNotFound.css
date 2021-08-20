@@ -23,13 +23,20 @@
   line-height: calc(19 / 16);
 }
 
-.button_type_to-main {
+.button_type_to-back {
   text-decoration: none;
   font-weight: 400;
   font-size: 14px;
   line-height: calc(17 / 14);
   color: #3456F3;
   margin: auto 0 60px;
+  transition: opacity .5s linear;
+}
+
+.button_type_to-back:hover {
+opacity: 0.8;
+cursor: pointer;
+text-decoration: underline;
 }
 
 @media (max-width: 425px) {

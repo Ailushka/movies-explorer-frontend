@@ -3,7 +3,7 @@ import './SearchForm.css';
 import FilterCheckBox from '../FilterCheckBox/FilterCheckBox.js';
 
 function SearchForm({onChangeFilters}) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   let searchError = '';
 
   function handleSubmit(evt) {

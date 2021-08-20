@@ -2,10 +2,8 @@ import './InfoTooltip.css';
 
 function InfoTooltip({isOpen, onClose, message}) {
 
-  const popupClassNames = `popup ${isOpen ? 'popup_opened' : ''}`;
-
   return (
-    <div className={popupClassNames}>
+    <div className={`popup ${isOpen && 'popup_opened'}`}>
       <div className="infotooltip">
         <img className="infotooltip__image" src={message.image} alt="Всплывающая подсказка" />
         <p className="infotooltip__message">{message.text}</p>

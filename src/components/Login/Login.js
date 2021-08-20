@@ -4,17 +4,16 @@ import Preloader from '../Preloader/Preloader.js';
 import useFormWithValidation from '../../utils/FormValidation.js';
 import logo from '../../images/logo.svg';
 
-function Login({ onLogin, isLoading, errorMessage }) {
+function Login({ onLogin, isLoading, errorMessage, isDisabled }) {
 
   const formWithValidation = useFormWithValidation();
   const { email, password } = formWithValidation.values;
-  const { values, handleChange, errors, isValid, resetForm } = formWithValidation;
+  const { values, handleChange, errors, isValid } = formWithValidation;
 
   function handleSubmit(e) {
     e.preventDefault();
 
     onLogin({ email, password });
-    resetForm();
   }
 
   return (
@@ -38,6 +37,7 @@ function Login({ onLogin, isLoading, errorMessage }) {
                 required
                 value={values.email || ''}
                 onChange={handleChange}
+                disabled={isDisabled}
               />
               <span id="email-error" className="form__input-error">{errors.email}</span>
             </li>
@@ -51,18 +51,15 @@ function Login({ onLogin, isLoading, errorMessage }) {
                 name="password"
                 id="password"
                 placeholder="Пароль"
+                disabled={isDisabled}
                 required
               />
               <span id="password-error" className="form__input-error">{errors.password}</span>
             </li>
           </ul>
         </fieldset>
-        <button type="submit" className={`button button_type_submit ${!isValid ? "button_disabled" : "button_enabled"}`} disabled={!isValid}>
-        {errorMessage
-          ? <span id="submit-error" className="submit-error">{errorMessage}</span>
-          : ''
-        }
-        Войти</button>
+        <span id="submit-error" className="submit-error">{errorMessage}</span>
+        <button type="submit" className={`button button_type_submit ${!isValid ? "button_disabled" : "button_enabled"}`} disabled={!isValid}>Войти</button>
       </form>
       <div className="entry__remark">
         <p className="entry__remark-text">Ещё не зарегистрированы?</p>

@@ -4,7 +4,7 @@ import './Profile.css';
 import { CurrentUserContext } from '../../contexts/CurrentUserContext.js';
 import useFormWithValidation from '../../utils/FormValidation.js';
 
-function Profile({onUpdateUser, isLoading, errorMessage, onLogOut}) {
+function Profile({onUpdateUser, isLoading, errorMessage, onLogOut, isDisabled}) {
   const currentUser = useContext(CurrentUserContext);
   const formWithValidation = useFormWithValidation();
   const { name, email } = formWithValidation.values;
@@ -41,6 +41,7 @@ function Profile({onUpdateUser, isLoading, errorMessage, onLogOut}) {
                 value={name || ''}
                 placeholder="Имя"
                 onChange={formWithValidation.handleChange}
+                disabled={isDisabled}
                 required
               />
               <span id="name-error" className="form__input-error">{formWithValidation.errors.name}</span>
@@ -55,12 +56,14 @@ function Profile({onUpdateUser, isLoading, errorMessage, onLogOut}) {
                 value={email || ''}
                 placeholder="E-mail"
                 onChange={formWithValidation.handleChange}
+                disabled={isDisabled}
                 required
               />
               <span id="email-error" className="form__input-error">{formWithValidation.errors.email}</span>
             </li>
           </ul>
         </fieldset>
+        <span id="submit-error" className="submit-error">{errorMessage}</span>
         <button type="submit" className={`button button_type_edit ${currentUser && (name === currentUser.name && email === currentUser.email) || !formWithValidation.isValid ? "button_inactive" : ""}`} disabled={currentUser && (name === currentUser.name && email === currentUser.email) || !formWithValidation.isValid}>Редактировать</button>
         <Link className="profile__link" to="/" onClick={onLogOut}>Выйти из аккаунта</Link>
       </form>

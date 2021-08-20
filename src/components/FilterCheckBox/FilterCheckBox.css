@@ -24,7 +24,7 @@
   position: absolute;
   width: 36px;
   height: 20px;
-  background: #2BE080;
+  background: #EBEBEB;
   border-radius: 20px;
   right: 0;
   cursor: pointer;
@@ -35,7 +35,7 @@
     content: "";
     height: 8px;
     width: 8px;
-    left: 22px;
+    right: 22px;
     top: 6px;
     background-color: white;
     transition: .5s;
@@ -43,12 +43,12 @@
 }
 
 input[type="checkbox"]:checked + .filtercheckbox__switch {
-    background: #EBEBEB;
+    background: #2BE080;
 }
 
 input[type="checkbox"]:checked + .filtercheckbox__switch::before {
     background-color: #F5F5F5;
-    transform: translateX(-16px);
+    transform: translateX(16px);
 }
 
 @media (max-width: 768px) {
