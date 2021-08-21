@@ -42,6 +42,13 @@
   border: 1px solid #3456F3;
 }
 
+.searchform__input-error {
+  font-weight: 400;
+  font-size: 10px;
+  line-height: calc(12 / 10);
+  color: #FF3055;
+}
+
 .button_type_search {
   position: absolute;
   right: 0;

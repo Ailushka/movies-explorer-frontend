@@ -6,6 +6,15 @@
   justify-content: space-between;
 }
 
+.movies__empty {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: calc(16 / 13);
+}
+
 @media (max-width: 768px) {
   .movies__list {
     margin-bottom: 30px;

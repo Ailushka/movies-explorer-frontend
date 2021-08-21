@@ -81,6 +81,15 @@
   color: #FF3055;
 }
 
+.submit-error {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: calc(16 / 14);
+  color: #FF3055;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
 .button_type_submit {
   padding: 13px 0 15px;
   font-weight: 500;
@@ -95,17 +104,11 @@
 .button_disabled {
   background: #F8F8F8;
   color: #C2C2C2;
-  transition: opacity .5s linear;
-}
-
-.button_disabled:hover {
-  opacity: 0.8;
-  cursor: pointer;
 }
 
 .button_enabled {
   background: #3456F3;
-  color: #FFFFFF;
+  color: #000000;
   transition: opacity .5s linear;
 }
 

@@ -1,24 +1,48 @@
+import { useState } from 'react';
 import './SearchForm.css';
 import FilterCheckBox from '../FilterCheckBox/FilterCheckBox.js';
 
-function SearchForm() {
+function SearchForm({onChangeFilters}) {
+  const [searchQuery, setSearchQuery] = useState('');
+  let searchError = '';
+
+  function handleSubmit(evt) {
+    evt.preventDefault();
+    onChangeFilters({
+      key: "search",
+      value: searchQuery,
+    });
+    if (!searchQuery) {
+      searchError = 'Нужно ввести ключевое слово.';
+    }
+  }
+
+  function handleChangeSearchQuery(evt) {
+    setSearchQuery(evt.target.value);
+  }
+
   return (
-    <section class="searchform">
-      <div class="searchform__content container">
-        <form class="form form_type_search search__form">
-          <label class="searchform__label">
+    <section className="searchform">
+      <div className="searchform__content container">
+        <form className="form form_type_search search__form" onSubmit={handleSubmit}>
+          <label className="searchform__label">
             <input
-              class="searchform__input"
+              className="searchform__input"
               type="text"
               name="search"
               id="search"
               placeholder="Фильм"
+              value={searchQuery}
+              onChange={handleChangeSearchQuery}
               required
             />
-            <button type="submit" class="button button_type_search"></button>
+            <span id="search-error" className="searchform__input-error">{searchError}</span>
+            <button type="submit" className="button button_type_search"></button>
           </label>
         </form>
-        <FilterCheckBox />
+        <FilterCheckBox
+          onChangeFilters={onChangeFilters}
+        />
       </div>
     </section>
   );
