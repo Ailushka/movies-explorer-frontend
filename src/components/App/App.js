@@ -74,7 +74,6 @@ function App() {
             id: movie.movieId
           };
         });
-        setUserMovies(savedMovies);
         setUserMovies(savedMovies.filter(i => i.owner === currentUser._id));
       })
       .catch(err => console.log(err));
